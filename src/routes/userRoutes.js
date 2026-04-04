@@ -8,8 +8,7 @@ const { protect, authorize } = require("../middlewares/authMiddleware");
  * Only ADMIN can create users
  */
 router.post(
-  "/",
-  protect,
+  "/",protect,
   authorize(["ADMIN"]),
   userController.createUser
 );

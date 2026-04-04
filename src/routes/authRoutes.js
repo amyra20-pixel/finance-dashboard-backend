@@ -3,5 +3,4 @@ const router = express.Router();
 const { login } = require("../controllers/authController");
 
 router.post("/login", login);
-console.log("AUTH ROUTES LOADED");
 module.exports = router;

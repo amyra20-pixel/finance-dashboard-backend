@@ -1,15 +1,17 @@
 const prisma = require('../prisma');
 
 // Summary: income, expense, balance
-const getSummary = async () => {
-  const records = await prisma.financialRecord.findMany();
+const getSummary = async (user) => {
+  const records = await prisma.financialRecord.findMany({
+    where: user.role === "ADMIN" ? {} : { userId: user.id }
+  });
 
   let totalIncome = 0;
   let totalExpense = 0;
 
   records.forEach(r => {
-    if (r.type === 'income') totalIncome += r.amount;
-    if (r.type === 'expense') totalExpense += r.amount;
+    if (r.type === 'INCOME') totalIncome += r.amount;
+    if (r.type === 'EXPENSE') totalExpense += r.amount;
   });
 
   return {
@@ -20,8 +22,10 @@ const getSummary = async () => {
 };
 
 // Category breakdown
-const getCategoryBreakdown = async () => {
-  const records = await prisma.financialRecord.findMany();
+const getCategoryBreakdown = async (user) => {
+  const records = await prisma.financialRecord.findMany({
+    where: user.role === "ADMIN" ? {} : { userId: user.id }
+  });
 
   const result = {};
 
@@ -36,15 +40,41 @@ const getCategoryBreakdown = async () => {
 };
 
 // Recent transactions
-const getRecent = async () => {
+const getRecent = async (user) => {
   return await prisma.financialRecord.findMany({
-    orderBy: { createdAt: 'desc' },
+    where: user.role === "ADMIN" ? {} : { userId: user.id },
+    orderBy: { createdAt: "desc" },
     take: 5
   });
+};
+//Get monthly trends
+const getMonthlyTrends = async (user) => {
+  const records = await prisma.financialRecord.findMany({
+    where: user.role === "ADMIN" ? {} : { userId: user.id }
+  });
+
+  const result = {};
+
+  records.forEach(r => {
+    const month = r.date.toISOString().slice(0, 7); // YYYY-MM
+
+    if (!result[month]) {
+      result[month] = { income: 0, expense: 0 };
+    }
+
+    if (r.type === "INCOME") result[month].income += r.amount;
+    if (r.type === "EXPENSE") result[month].expense += r.amount;
+  });
+
+  return Object.keys(result).sort().map(month => ({
+    month,
+    ...result[month]
+  }));
 };
 
 module.exports = {
   getSummary,
   getCategoryBreakdown,
-  getRecent
+  getRecent,
+  getMonthlyTrends
 };

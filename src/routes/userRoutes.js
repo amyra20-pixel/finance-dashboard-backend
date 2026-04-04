@@ -1,13 +1,40 @@
-const express = require('express');
+const express = require("express");
 const router = express.Router();
+const userController = require("../controllers/userController");
+const { protect, authorize } = require("../middlewares/authMiddleware");
 
-const userController = require('../controllers/userController');
-const { checkRole } = require('../middlewares/authMiddleware');
+/**
+ * CREATE USER
+ * Only ADMIN can create users
+ */
+router.post(
+  "/",
+  protect,
+  authorize(["ADMIN"]),
+  userController.createUser
+);
 
-// only admin can create users
-router.post('/', checkRole(['admin']), userController.createUser);
+/**
+ * GET ALL USERS
+ * Only ADMIN can view users
+ */
+router.get(
+  "/",
+  protect,
+  authorize(["ADMIN"]),
+  userController.getUsers
+);
 
-// only admin can view users
-router.get('/', checkRole(['admin']), userController.getUsers);
+router.delete(
+  "/:id",
+  protect,
+  authorize(["ADMIN"]),
+  userController.deleteUser
+);
+
+router.patch(
+  "/:id/status", 
+  protect, authorize(["ADMIN"]), 
+  userController.updateUserStatus);
 
 module.exports = router;

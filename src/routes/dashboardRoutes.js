@@ -1,11 +1,47 @@
-const express = require('express');
+const express = require("express");
 const router = express.Router();
 
-const dashboardController = require('../controllers/dashboardController');
-const { checkRole } = require('../middlewares/authMiddleware');
-//All roles can view dashboard
-router.get('/summary', checkRole(['admin', 'analyst', 'viewer']), dashboardController.getSummary);
-router.get('/category', checkRole(['admin', 'analyst', 'viewer']), dashboardController.getCategoryBreakdown);
-router.get('/recent', checkRole(['admin', 'analyst', 'viewer']), dashboardController.getRecent);
+const dashboardController = require("../controllers/dashboardController");
+const { protect, authorize } = require("../middlewares/authMiddleware");
+
+/**
+ * DASHBOARD SUMMARY
+ */
+router.get(
+  "/summary",
+  protect,
+  authorize(["ADMIN", "ANALYST", "VIEWER"]),
+  dashboardController.getSummary
+);
+
+/**
+ * CATEGORY BREAKDOWN
+ */
+router.get(
+  "/category",
+  protect,
+  authorize(["ADMIN", "ANALYST", "VIEWER"]),
+  dashboardController.getCategoryBreakdown
+);
+
+/**
+ * RECENT TRANSACTIONS / DATA
+ */
+router.get(
+  "/recent",
+  protect,
+  authorize(["ADMIN", "ANALYST", "VIEWER"]),
+  dashboardController.getRecent
+);
+
+/**
+ * MONTHLY TRENDS
+ */
+router.get(
+  "/monthly",
+  protect,
+  authorize(["ADMIN", "ANALYST", "VIEWER"]),
+  dashboardController.getMonthlyTrends
+);
 
 module.exports = router;

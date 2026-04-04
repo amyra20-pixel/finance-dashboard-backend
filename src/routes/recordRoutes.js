@@ -1,13 +1,51 @@
-const express = require('express');
+const express = require("express");
 const router = express.Router();
 
-const recordController = require('../controllers/recordController');
-const { checkRole } = require('../middlewares/authMiddleware');
+const recordController = require("../controllers/recordController");
+const { protect, authorize } = require("../middlewares/authMiddleware");
 
-// only admin can create
-router.post('/', checkRole(['admin']), recordController.createRecord);
+/**
+ * CREATE RECORD
+ * ADMIN + ANALYST only
+ */
+router.post(
+  "/",
+  protect,
+  authorize(["ADMIN", "ANALYST"]),
+  recordController.createRecord
+);
 
-// Analyst + admin can view
-router.get('/', checkRole(['admin', 'analyst']), recordController.getRecords);
+/**
+ * GET RECORDS
+ * ALL ROLES
+ */
+router.get(
+  "/",
+  protect,
+  authorize(["ADMIN", "ANALYST", "VIEWER"]),
+  recordController.getRecords
+);
+
+/**
+ * UPDATE RECORD
+ * ADMIN + ANALYST
+ */
+router.put(
+  "/:id",
+  protect,
+  authorize(["ADMIN", "ANALYST"]),
+  recordController.updateRecord
+);
+
+/**
+ * DELETE RECORD
+ * ADMIN ONLY
+ */
+router.delete(
+  "/:id",
+  protect,
+  authorize(["ADMIN"]),
+  recordController.deleteRecord
+);
 
 module.exports = router;
